@@ -1,0 +1,213 @@
+Exercise 1.1 - Driving Linear Learner (Optional)
+ Bookmark this page
+ Note
+The exercises in this course will have an associated charge in your AWS account. In this exercise, you will create the following:
+
+AWS Identity and Access Management (IAM) policy and user (Policies and users are AWS account features, offered at no additional charge.)
+Amazon EC2 instance for your AWS Cloud9 development environment
+Amazon S3 bucket, with training and model S3 objects
+Amazon SageMaker ML training instance
+Amazon SageMaker ML hosting instance
+Be sure to follow the exercise instructions for deleting resources created in this exercise.
+
+Familiarize yourself with Amazon SageMaker Pricing at https://aws.amazon.com/sagemaker/pricing/ and the AWS Free Tier at https://aws.amazon.com/free/.
+
+In this exercise, you will train a Linear Learner model to drive a car on a simulated track. First, you will create the IAM user and policy used in all the exercises. You will also create an AWS Cloud9 instance as a location to run the Python scripts used in this course. With a little extra configuration, you will then be able to run the scripts on your local environment.
+
+On the AWS Cloud9 instance, you will create training data by driving a car on a simulated track. You will use this data to create a training job. Using the resulting model, you will create an Amazon SageMaker endpoint. By using inference results from your endpoint, the car will be able to automatically drive on the track.
+
+To begin, complete the following steps.
+
+1. Create an IAM policy.
+In this section, you will create an IAM customer-managed policy. Customer-managed policies provide more precise control over your policies than policies managed by AWS. This policy will have permissions specific to the AWS resources you need for this course.
+
+In the AWS Management Console, click Services, and then click IAM to open the IAM dashboard.
+In the left navigation menu, click Policies.
+Click Create policy.
+Click the JSON tab.
+In the editor text box, replace the sample policy with the following:
+
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+    "Effect": "Allow",
+    "Action": [
+      "apigateway:*",
+      "lambda:*",
+      "s3:*",
+      "logs:*",
+      "cloud9:*",
+      "iam:*",
+      "cloudwatch:*",
+      "ec2:*",
+      "sagemaker:*",
+      "kms:ListAliases"
+    ],
+    "Resource": "*"
+    }
+  ]
+}
+Click Review Policy.
+For Name, enter edXSageMakerPolicy.
+Click Create policy.
+
+You successfully created an IAM policy.
+
+2. Create an IAM user and attach a policy to the user.
+In this section, you will create an IAM user and attach a policy to the user. If you are familiar with IAM users, you might want to attempt to complete this section before reading the step-by-step instructions.
+
+IAM user name:	SageMakerOnAWS
+Access type:	AWS Console access
+Policy:	edXSageMakerPolicy
+Important Note the password for the edXSageMakerUser user and the sign-in URL for the IAM user. You should see the sign-in URL in the success message at the top.
+
+Expand for step-by-step instructions.
+
+
+3. Create an AWS Cloud9 environment.
+In this section, you will create an AWS Cloud9 environment. If you are familiar with AWS Cloud9, you might want to attempt to complete this section before reading the step-by-step instructions.
+
+AWS Cloud9 environment name:	edXSageMakerUser
+Network and instance type settings:	Default settings
+Expand for step-by-step instructions.
+Sign in to the AWS Management Console as the edXSageMakerUser IAM user.
+In the console, click Services, and then click Cloud9 to open the Cloud9 dashboard.
+Make sure you are in the Oregon Region.
+Click Create environment at the top-right corner.
+For Name, enter SageMakerOnAWS.
+Click Next step.
+On the Configure Settings page, leave the default settings, and click Next step.
+Review the details, and click Create environment. This should launch your AWS Cloud9 environment in a few minutes.
+
+
+4. Download and run the training code.
+In this section, you will download and extract the source code for this exercise. The source package contains the training.py script, which you will use to create training data for your SageMaker model.
+
+To download and extract the application code, run the following commands in your AWS Cloud9 terminal:
+
+cd ~/environment
+wget http://us-west-2-tcdev.s3.amazonaws.com/courses/AWS-100-MLS/v1.0.0/exercises/ex-driver.zip -O ex-driver.zip
+unzip ex-driver.zip
+Change to the ex-driver directory, and use pip to install the Python requirements. This command installs boto3 onto your Cloud9 instance. This is needed later in the exercise when you run inference.py.
+
+cd ~/environment/ex-driver
+pip-3.6 install -r requirements.txt --user
+Use the following command to launch training.py. Use the arrow keys to drive the car on the sine wave track. The road display is always relative to the car. Think of it as data from a sensor array on the front of the car.
+
+python3 training.py
+
+
+The training.py command generates a CSV file from your training session. The file contains labeled data of your steering decisions and a representation of how the road looked at the time you made each decision.
+
+5. Create an Amazon S3 bucket to store the training data and model artifact.
+In this section, you will create an Amazon S3 bucket in your AWS account. This bucket will store your training data and, later in the exercise, the model artifact. If you are familiar with Amazon S3, you might want to attempt to complete this section by using the following properties before reading the step-by-step instructions.
+
+Region:	Oregon (us-west-2)
+Bucket name:	REPLACE_WITH_YOUR_INITIALS-sagemaker (using your initials creates a unique bucket name)
+Expand for step-by-step instructions.
+
+
+6. Create the Amazon SageMaker training job.
+In this section, you will create the Amazon SageMaker training job to train a model with the CSV data you created earlier.
+
+Return to your Cloud9 SageMakerOnAWS environment.
+Use the AWS CLI to copy your training.csv file to the newly created S3 bucket. NOTE In the following command, replace REPLACE_WITH_YOUR_INITIALS with your initials to match the bucket you created earlier.
+
+aws s3 cp ~/environment/ex-driver/training.csv s3://REPLACE_WITH_YOUR_INITIALS-sagemaker
+In the console, click Services, and then click Amazon SageMaker to open the Amazon SageMaker dashboard.
+Make sure you are in the Oregon Region.
+In the left navigation pane, click Training jobs, and then click Create training job.
+For Job name, enter driving-training.
+For IAM role, select Create a new role.
+In Create an IAM role, choose Any S3 bucket, and then click Create role.
+For Algorithm, select Linear Learner.
+Scroll to the Hyperparameters section.
+For feature_dim, enter 250. This is the shape of the road representation – 10 rows * 25 columns = 250 features.
+For mini_batch_size, enter 100. For the small set of training data, you need to lower this size.
+For predictor_type, enter multiclass_classifier.
+For num_classes, enter 3. You are classifying the data into three classes – turn left, drive straight, and turn right.
+Scroll to the Input data configuration section.
+For Content type, enter text/csv.
+For S3 data type, choose S3Prefix.
+For S3 location, enter s3://REPLACE_WITH_YOUR_INITIALS-sagemaker/training.csv.
+Click Done.
+Scroll to the Output data configuration section.
+For S3 output path, enter s3://REPLACE_WITH_YOUR_INITIALS-sagemaker/.
+Click Create training job.
+
+The training job will take about 3 minutes to complete. When the training job status moves to Completed, continue to the next section.
+
+
+
+7. Create the Amazon SageMaker model and endpoint.
+In this section, you will create the Amazon SageMaker model. A model contains a reference to the location of your inference code and optionally associated artifacts. Next, you will create an Amazon SageMaker endpoint. The endpoint provisions resources and deploys the model for Amazon SageMaker hosting services.
+
+Return to the Amazon SageMaker dashboard.
+In the left navigation pane, click Training jobs, and choose driving-training.
+For Actions, click Create model.
+On the Create model screen, for Model name, enter driving-model.
+
+Note Location of inference code image and Location of model artifacts are populated for you with details from your driving-training job.
+
+Click Create model.
+To create an endpoint for your model, choose driving-model.
+Click Create endpoint.
+On the Create and configure endpoint screen, for Endpoint name, enter driving-endpoint.
+Ensure Create a new endpoint configuration is selected.
+For Endpoint configuration name, enter driving-endpoint-configuration.
+In the Production variants table, click Edit.
+Modify the Instance type to ml.t2.medium, and click Save.
+Click Create endpoint configuration.
+Click Create endpoint.
+
+Creating the endpoint takes about 10 minutes to complete.
+
+
+
+8. Inference with the endpoint.
+In this section, you will run the inference.py script to communicate with the Amazon SageMaker endpoint created in the previous task.
+
+Return to your Cloud9 SageMakerOnAWS environment.
+Inspect the contents of the ex-driver/inference.py file. The following code invokes the new endpoint for an inference. The code passes in a representation of the road data and an inference is returned.
+
+# ask sagemaker linear learner for the car direction
+body = ",".join(road_csv)
+response = client.invoke_endpoint(
+    EndpointName='driving-endpoint',
+    Body=body,
+    ContentType='text/csv'
+)
+interfence = json.loads(response['Body'].read())
+label = int(interfence["predictions"][0]["predicted_label"])
+The inference JSON response contains predictions, scores for each label and a predicted_label. The code uses the predicted_label make a direction decision.
+
+{
+  "predictions": [
+    {
+      "score": [
+        0.9913098216056824,
+        0.008546961471438408,
+        0.000143218640005216
+      ],
+      "predicted_label": 0
+    }
+  ]
+}
+Run the following commands in your AWS Cloud9 terminal to change to the exercise folder and run the inference code:
+
+cd ~/environment/ex-driver
+python3 inference.py
+You have the option of running the simulated car against a random or sine wave road. Press CTRL+C or COMMAND+C to break out of the program, or wait for it to complete.
+
+9. Delete the endpoint, endpoint configuration, and model.
+In the console, click Services, and then click Amazon SageMaker to return to the Amazon SageMaker dashboard.
+In the left navigation pane, click Endpoints, and choose driving-endpoint.
+For Actions, click Delete.
+Click Delete to confirm.
+In the left navigation pane, click Endpoint configurations, and choose driving-endpoint-configuration.
+For Actions, click Delete.
+Click Delete to confirm.
+In the left navigation pane, click Models, and choose driving-model.
+For Actions, click Delete.
+Click Delete to confirm.

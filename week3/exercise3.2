@@ -1,0 +1,51 @@
+Exercise 3.2: Using the XGBoost Algorithm (Optional)
+ Bookmark this page
+ Note
+The exercises in this course will generate associated charges in your AWS account. In this exercise, you will create the following:
+
+Training and model Amazon S3 objects
+Amazon SageMaker ML training instance
+Amazon SageMaker ML hosting instance
+Be sure to follow the exercise instructions for deleting resources created in this exercise.
+
+Familiarize yourself with Amazon SageMaker Pricing at https://aws.amazon.com/sagemaker/pricing/ and the AWS Free Tier at https://aws.amazon.com/free/.
+
+In this exercise, you will complete an Amazon SageMaker example notebook for Customer Churn Prediction with XGBoost. XGBoost (Extreme Gradient Boosting) is a popular and efficient open source implementation of the gradient boosted trees algorithm. Gradient boosting is a supervised learning algorithm that attempts to accurately predict a target variable by combining the estimates of a set of simpler, weaker models.
+
+In this example notebook, you will work with a dataset of customers from a fictional mobile operator. The dataset has a churn value, which indicates whether a customer left the service. At the end of the notebook, you will look at optimizing the threshold for predicted churn. A value is assigned to the four states—false positive, true positive, false negative, and true negative. You will use this formula to determine the cutoff value where costs are minimized.
+
+For more details on the Amazon SageMaker built-in XGBoost algorithm, see https://docs.aws.amazon.com/sagemaker/latest/dg/xgboost.html.
+
+1. Start the Amazon SageMaker notebook instance.
+In this section, you will return to your Amazon SageMaker notebook instance and start the instance.
+
+Expand for step-by-step instructions.
+
+
+2. Start the Amazon SageMaker example.
+In this section, you will launch the sample xgboost_customer_churn.ipynb notebook into your notebook instance.
+
+The Amazon SageMaker examples are maintained in a Git repository at https://github.com/awslabs/amazon-sagemaker-examples.
+
+From the Jupyter notebook home, click SageMaker Examples.
+To open the xgboost_customer_churn example, click Introduction to Applying Machine Learning > xgboost_customer_churn.ipynb, and click Use.
+Click Create copy to copy and launch the example.
+In the first code cell of the notebook, locate the code that sets the bucket. Update the variable with your REPLACE_WITH_YOUR_INITIALS-sagemaker bucket created in the first exercise.
+
+bucket = 'REPLACE_WITH_YOUR_INITIALS-sagemaker'
+To complete the example notebook, run each individual cell, and inspect the output from each run.
+
+3. End running Jupyter processes, and stop the notebook instance.
+From the Jupyter notebook home, click Running.
+Click Shutdown next to the terminal and notebook.
+To stop the notebook instance, return to the AWS console, and then click Services > Amazon SageMaker to open the Amazon SageMaker dashboard.
+In the left navigation pane, click Notebook instances, and then click Stop next to the edXSageMaker instance.
+4. Delete the endpoint configuration and model.
+Return to the the Amazon SageMaker dashboard.
+In the left navigation pane, click Endpoints, and ensure the endpoint created by the notebook has been removed.
+In the left navigation pane, for Endpoint configurations, click the endpoint that starts with xgboost.
+For Actions, click Delete.
+Click Delete to confirm.
+In the left navigation pane, for Models, click the model that starts with xgboost.
+For Actions, click Delete.
+Click Delete to confirm.

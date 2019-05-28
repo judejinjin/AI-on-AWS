@@ -1,0 +1,188 @@
+Exercise 4.1 - Factorization Machines Movie Recommendations (Optional)
+ Bookmark this page
+ Note
+The exercises in this course will generate associated charges in your AWS account. In this exercise, you will create the following:
+
+AWS IAM policy
+AWS Lambda function
+Amazon API Gateway REST API
+Training and model Amazon S3 objects
+Amazon SageMaker ML training instance
+Amazon SageMaker ML hosting instance
+Be sure to follow the exercise instructions for deleting resources created in this exercise.
+
+Familiarize yourself with Amazon SageMaker Pricing at https://aws.amazon.com/sagemaker/pricing/ and the AWS Free Tier at https://aws.amazon.com/free/.
+
+In this exercise, you will create a serverless AWS Chalice application for movie recommendations. Chalice is a microframework for writing serverless applications in Python. For more details on Chalice, see https://github.com/aws/chalice.
+
+1. Create an AWS IAM policy and role for the AWS Lambda function.
+In this section, you will create a policy and role used by the Lambda function. The Lambda function calls the Amazon SageMaker InvokeEndpoint API method. The role is used to authenticate the call. You will use the movies-role ARN to configure a Lambda function.
+
+In the AWS console, click Services > IAM to open the IAM dashboard.
+In the left navigation menu, click Policies.
+Click Create policy.
+Click the JSON tab.
+In the editor text box, replace the sample policy with the following:
+
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "sagemaker:InvokeEndpoint"
+            ],
+            "Resource": [
+                "*"
+            ]
+        }
+    ]
+}
+Click Review Policy.
+For Name, type movies-policy in the text box.
+Click Create policy.
+On the left navigation menu, click Roles.
+Click Create role.
+For Select type of trusted entity, scroll and select Lambda.
+Click Next: Permissions.
+For search, type movies in the text box.
+Select movies-policy.
+Click Next: Review.
+For Role name, type movies-lambda-role in the text box.
+Click Create role.
+From the list of roles, click the movies-lambda-role.
+On the role summary page, note the ARN of the role. The ARN should look similar to arn:aws:iam::123456789012:role/movies-lambda-role.
+
+2. Download and populate a MovieLens database.
+In this section, you will download and extract the application source code for this exercise. The application retrieves MovieLens data from a local SQLite database. You will download the MovieLens dataset and run a Python script to create the SQLite database.
+
+To download and extract the application code, run the following commands in your AWS Cloud9 terminal:
+
+cd ~/environment
+wget http://us-west-2-tcdev.s3.amazonaws.com/courses/AWS-100-MLS/v1.0.0/exercises/ex-application.zip -O ex-application.zip
+unzip ex-application.zip
+Download the MovieLens dataset, and run the following commands to populate the SQLite database:
+
+cd ~/environment/ex-application/scripts
+wget http://files.grouplens.org/datasets/movielens/ml-100k.zip -O ml-100k.zip
+unzip ml-100k.zip
+python3 db_import.py
+Move the database to the location where the application is expecting it, as follows:
+
+mv movies.db ../chalicelib/
+3. Preview the Chalice application.
+In this section, you will run the application for the first time. You will use the Chalice microframework to run the application on a local server. Later, you will deploy the application to an AWS infrastructure.
+
+Return to your Cloud9 terminal window, and enter the following commands. First, change to the application folder, and activate a python2 virtual environment. The virtualenv command is used to create a separated package installation. This helps with packaging dependencies for the AWS Lambda deployment package. For more information about virtualenv, see https://packaging.python.org/guides/installing-using-pip-and-virtualenv/.
+
+cd ~/environment/ex-application
+virtualenv --python=python2.7 .venv
+source .venv/bin/activate
+Install the application requirements.
+
+pip2 install -r requirements.txt
+Launch the Chalice local web server.
+
+chalice local --port=8080
+To preview the application in the AWS Cloud9 environment, click Preview > Preview Running Application.
+
+4. Create the Amazon SageMaker factorization machines endpoint.
+In this section, you will create and train a factorization machines algorithm model with the MovieLens dataset. This is done inside a notebook supplied from the AWS Machine Learning Blog.
+
+Start your Amazon SageMaker notebook instance.
+Expand for step-by-step instructions.
+
+
+To download the factorization-machines-Movielens.ipynb notebook, open the Jupyter notebook home.
+For New, click Terminal to open a terminal window.
+Run the following commands to change the directory and download the notebook:
+
+cd ~/SageMaker/
+wget https://s3.amazonaws.com/aws-ml-blog/artifacts/factorization-machines/Factorization-Machines-Movielens.ipynb -O Factorization-Machines-Movielens.ipynb
+Return to the Jupyter notebook home, and launch the factorization-machines-Movielens.ipynb notebook. Before running any of the cells, update the settings, as described in the next steps.
+In the Convert to protobuf and save to S3 section of the notebook, locate the code that sets the bucket. Update this variable with the REPLACE_WITH_YOUR_INITIALS-sagemaker bucket you created in the first exercise, as follows:
+
+bucket = 'REPLACE_WITH_YOUR_INITIALS-sagemaker'
+In the Deploy model section of the notebook, update the following line to use an ml.t2.medium instance type. The default larger instance type isn’t needed for this exercise.
+
+fm_predictor = fm.deploy(instance_type='ml.t2.medium', initial_instance_count=1)
+Complete the example notebook, run each individual cell, and inspect the output from each run. Note the name of the endpoint created by the notebook, it should look like factorization-machines-2018-11-06-17-16-15-576.
+
+5. Configure and deploy the Chalice application.
+In this section, you will configure your application with the location of the new endpoint and the role used for authenticating the Lambda function. Once the application is configured, you can deploy to the AWS infrastructure—Lambda and API Gateway.
+
+On your Cloud9 instance, click the Show Hidden Files menu option, as shown.
+
+
+
+Open /ex-application/.chalice/config.json, and replace REPLACE_WITH_ROLE_ARN with the role ARN you noted for the movies-lambda-role role. Replace REPLACE_WITH_SAGEMAKER_ENDPOINT with the endpoint you noted in the previous section.
+Return to your Cloud9 terminal window. If the Chalice local web server isn’t already running, use the following command to launch it:
+
+chalice local --port=8080
+To preview the application, click Preview > Preview Running Application. The application is configured with an inference endpoint.
+Click the Get Recommendations button to retrieve an inference recommendation.
+Return to the Cloud9 terminal window.
+Press CTRL+C or COMMAND+C to exit the local Chalice server.
+Deploy the application by running the following command:
+
+chalice deploy
+A successful deployment of the application displays the Rest API URL, as shown in the following image. Click the link to visit the deployed application.
+
+
+
+6. Delete the endpoint, endpoint configuration, and model.
+Return to the the Amazon SageMaker dashboard.
+In the left navigation pane, for Endpoints, click the endpoint that starts with factorization-machines.
+For Actions, click Delete.
+Click Delete to confirm.
+In the left navigation pane, for Endpoint configurations, click the endpoint that starts with factorization-machines.
+For Actions, click Delete.
+Click Delete to confirm.
+In the left navigation pane, for Models, click the model that starts with factorization-machines.
+For Actions, click Delete.
+Click Delete to confirm.
+7. Delete all exercise resources.
+Congratulations! You successfully completed the course project. If you want to delete the AWS resources created for this project, complete the following steps.
+
+Return to your Cloud9 terminal window.
+Delete the resources hosting your Chalice application. This will remove the Lambda and API Gateway resources created by Chalice.
+
+chalice delete
+Open the Amazon S3 dashboard.
+Delete REPLACE_WITH_YOUR_INITIALS-sagemaker and the bucket starting with sagemaker-us-west-2. You need to empty the bucket before deleting it.
+Open IAM Policies.
+Filter the polices to show Customer managed.
+Delete movies-policy and the policy that starts with AmazonSageMaker-ExecutionPolicy.
+Open IAM Roles.
+Delete the movies-lambda-role role.
+Open the AWS Cloud9 dashboard.
+Delete the SageMakerOnAWS AWS Cloud9 environment.
+Open SageMaker Notebooks.
+Stop and delete the edXSageMaker notebook.
+Finally, sign in as another user, and delete the edXSageMakerPolicy IAM policy and edXSageMakerUser IAM user.
+
+8. Optimize further.
+The sample code used in this application sends a one-hot encoded CSV string to the Amazon SageMaker hosted endpoint, as stated in the AWS documentation reference for factorization machines. “For inference, factorization machines support the application/json and x-recordio-protobuf formats.”
+
+This could be made significantly more efficient (and quicker) by sending recordio protobuf data.
+
+The code to do this looks similar to the sample notebook used to create the endpoint, as follows:
+
+from scipy.sparse import lil_matrix
+import sagemaker.amazon.common as smac
+import io
+
+sparse_matrix = lil_matrix((movie_count, feature_count)).astype('float32')
+for line in range(movie_count):
+    sparse_matrix[line,int(user_id)-1] = 1
+    sparse_matrix[line, user_count + line] = 1
+
+buf = io.BytesIO()
+smac.write_spmatrix_to_sparse_tensor(buf, sparse_matrix)
+buf.seek(0)
+client = boto3.client('sagemaker-runtime')
+response = client.invoke_endpoint(
+  EndpointName=endpoint,
+  Body=buf,
+  ContentType="application/x-recordio-protobuf"
+)

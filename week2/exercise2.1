@@ -1,0 +1,68 @@
+Exercise 2.1: Create Your Notebook Instance (Optional)
+ Bookmark this page
+ Note
+The exercises in this course will generate associated charges in your AWS account. In this exercise, you will create the following:
+
+AWS Identity and Access Management (IAM) role
+Amazon SageMaker Machine Learning (ML) notebook instance
+Be sure to follow the exercise instructions for deleting resources created in this exercise.
+
+Familiarize yourself with Amazon SageMaker Pricing at https://aws.amazon.com/sagemaker/pricing/ and the AWS Free Tier at https://aws.amazon.com/free/.
+
+Before using a dataset to train a model, data scientists typically explore and preprocess the dataset. This exercise enables you to work with a Jupyter notebook instance and the popular libraries matplotlib, numpy, and pandas to preprocess and visualize data.
+
+1. Create an Amazon SageMaker notebook instance.
+In this section, you will create an Amazon SageMaker notebook instance.
+
+Sign in to the AWS Management Console as the edXSageMakerUser IAM user.
+In the console, click Services > Amazon SageMaker to open the Amazon SageMaker dashboard.
+Make sure you are in the Oregon Region.
+In the left navigation pane, click Notebook instances > Create notebook instance.
+For Notebook instance name, enter edXSageMaker in the text box.
+Confirm that the IAM role is populated with the role you created in the previous exercise.
+Click Create notebook instance.
+After a few minutes, your notebook instance becomes available. When the notebook instance status moves to InService, continue to the next section.
+
+
+
+2. Download Pandas-Demo.ipynb to the notebook instance.
+In this section, you will interact with your notebook instance for the first time. You will download the Pandas-Demo.ipynb notebook used in the presentation, and then run all the notebook cells on your own instance.
+
+Click the Open link for your new edXSageMaker notebook instance. The Jupyter notebook home opens in a new browser tab.
+To download the Pandas-Demo.ipynb notebook, open a terminal window, and for New, click Terminal. A terminal window displays where you can run commands on your notebook instance.
+Run the following commands to change the directory and download the notebook:
+
+cd ~/SageMaker/
+wget https://us-west-2-tcdev.s3.amazonaws.com/courses/AWS-100-MLS/v1.0.0/exercises/notebooks/Pandas-Demo.ipynb
+Return to the Jupyter notebook home. The browser tab is labeled Home.
+
+
+
+3. Run Pandas-Demo.ipynb on the notebook instance.
+In this section, you will interact with the same notebook from the presentation. Experiment by adding cells and taking a more adventurous tour of the notebook.
+
+If your notebook gets into a bad state, restart the kernel. From the notebook, click Kernel > Restart & Clear Output. This restarts the notebook kernel, clearing all set variables.
+
+From the Jupyter notebook home, click Pandas-Demo.ipynb to launch the notebook.
+From the notebook, run each individual cell, and inspect the output from each run.
+The following table shows helpful shortcuts.
+
+Command	Effect
+Keyboard icon 	View and search keyboard shortcuts
+ALT+ENTER	Run cell and select cell below
+DD	Delete cell
+TAB	Autocomplete Python variables and commands
+When you are finished with the notebook, close the Pandas-Demo tab.
+4. End running Jupyter processes, and stop the notebook instance.
+In this section, you will end the processes running on your notebook instance and stop the notebook instance. Every notebook and every terminal window running on the instance is a process potentially taking up resources. These processes can be accessed from the Running tab on the Jupyter notebook home. From here, you can return to the running processes or shut them down.
+
+The final step of the exercise is to stop the notebook instance. Your notebook files are persistent on the attached ML storage volume. You will return to the notebook instance in upcoming exercises.
+
+From the Jupyter notebook home, click Running.
+
+
+
+Click Shutdown next to the terminal and notebook.
+To stop the notebook instance, return to the AWS console, and click Services > Amazon SageMaker to open the Amazon SageMaker dashboard.
+In the left navigation pane, click Notebook instances, and then click Stop next to the edXSageMaker instance.
+
